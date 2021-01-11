@@ -122,11 +122,61 @@ function buildChart(sampleId){
   });
 }
 
+function buildguage(wfreq)
+{
+  console.log("buildguage");
+  
+    var traceA = {
+      type: "pie",
+      showlegend: false,
+      hole: 0.4,
+      rotation: 90,
+      values: [ 81/9, 81/9, 81/9, 81/9, 81/9, 81/9, 81/9, 81/9, 81/9, 81],
+      text: ['0-1','1-2','2-3','3-4','4-5','5-6','6-7','7-8','8-9'],
+      direction: "clockwise",
+      textinfo: "text",
+      textposition: "inside",
+      marker: {
+        colors: ['','','','','','','','','','white'],
+        labels: ['0-1','1-2','2-3','3-4','4-5','5-6','6-7','7-8','8-9'],
+        hoverinfo: "label"
+      }
+    };
+
+    var degrees = 50, radius = .9;
+    var radians = degrees * Math.PI / 180;
+    var x = -1 * radius * Math.cos(radians) * wfreq;
+    var y = radius * Math.sin(radians) * wfreq;
+    console.log(x,y);
+    var layout = {
+      shapes:[{
+          type: 'line',
+          x0: 0.5,
+          y0: 0.5,
+          x1: x,
+          y1: y,
+          line: {
+            color: 'black',
+            width: 3
+          }
+        }],
+      title: 'Washing frequency',
+      xaxis: {visible: false, range: [-1, 1]},
+      yaxis: {visible: false, range: [-1, 1]}
+    };
+ 
+  var data = [traceA];
+ 
+  Plotly.newPlot('gauge', data, layout);
+}
+
 //Cattch the event when the subject is changed and update the metadata and the graphs.
 function optionChanged(value) {
-  console.log(value);
+  //console.log(value);
   buildMetadata(value);
   buildChart(value);
+  
 }
 //Initialize the dashboard
 init();
+buildguage(10);
