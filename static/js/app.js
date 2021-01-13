@@ -1,6 +1,4 @@
-
 // Initialize the dashboard
-
 function init() 
 {
 
@@ -18,9 +16,10 @@ function init()
       });
 
       var firstId = names[0];
-      console.log(firstId);
+      
       buildMetadata(firstId);
       buildChart(firstId)
+      buildguage(firstId)
   });
 }
 
@@ -28,17 +27,20 @@ function init()
 //metadata and update the information for the test subject
 function buildMetadata(sampleId)
 {
-
   d3.json("samples.json").then(function(data) {
 
     var metadata = data.metadata;
+
     var results = metadata.filter(metaobj=>metaobj.id == sampleId)
-    //console.log(results);
+    console.log('freq')
+   
+    washFreq =  (results[0])['wfreq'];
+
     panel = d3.selectAll('.panel').select('.panel-body');
     panel.html("");
     Object.entries(results[0]).forEach(([key, value]) => {
       // console.log(key,value);
-     
+      
       panel.append('div')
             .html(function(d) {
               return `<strong>${key}:${value}</strong>`;
@@ -46,7 +48,6 @@ function buildMetadata(sampleId)
     
     });
   });
-
 }
 
 //Build a bar chart and bubble chart for that subject id
@@ -54,8 +55,8 @@ function buildMetadata(sampleId)
 function buildChart(sampleId){
 
     d3.json("samples.json").then(function(data) {
+      var metadata = data.metadata;
       var sample = data.samples.filter(sampleobj=>sampleobj.id == sampleId);
-      //console.log(sample);
 
       const otuIds = sample[0].otu_ids;
       const sampleValues = sample[0].sample_values;
@@ -118,56 +119,64 @@ function buildChart(sampleId){
       };
 
       Plotly.newPlot('bubble', bubbleData, bubbleLayout);
-
   });
 }
 
-function buildguage(wfreq)
+function buildguage(sampleId)
 {
-  console.log("buildguage");
-  
-    var traceA = {
-      type: "pie",
-      showlegend: false,
-      hole: 0.4,
-      rotation: 90,
-      values: [ 81/9, 81/9, 81/9, 81/9, 81/9, 81/9, 81/9, 81/9, 81/9, 81],
-      text: ['0-1','1-2','2-3','3-4','4-5','5-6','6-7','7-8','8-9'],
-      direction: "clockwise",
-      textinfo: "text",
-      textposition: "inside",
-      marker: {
-        colors: ['','','','','','','','','','white'],
-        labels: ['0-1','1-2','2-3','3-4','4-5','5-6','6-7','7-8','8-9'],
-        hoverinfo: "label"
-      }
-    };
+  d3.json("samples.json").then(function(data) {
+      var metadata = data.metadata;
+      var results = metadata.filter(metaobj=>metaobj.id == sampleId) 
+      console.log('freq {')
+    
+      washFreq =  (results[0])['wfreq'];
+      console.log(washFreq,sampleId)
+      var traceA = {
+        type: "pie",
+        showlegend: false,
+        hole: 0.4,
+        rotation: 90,
+        values: [ 81/9, 81/9, 81/9, 81/9, 81/9, 81/9, 81/9, 81/9, 81/9, 81],
+        text: ['0-1','1-2','2-3','3-4','4-5','5-6','6-7','7-8','8-9'],
+        direction: "clockwise",
+        textinfo: "text",
+        textposition: "inside",
+        marker: {
+          colors: ['','','','','','','','','','white'],
+          labels: ['0-1','1-2','2-3','3-4','4-5','5-6','6-7','7-8','8-9'],
+          hoverinfo: "label"
+        }
+      };
 
-    var degrees = 50, radius = .9;
-    var radians = degrees * Math.PI / 180;
-    var x = -1 * radius * Math.cos(radians) * wfreq;
-    var y = radius * Math.sin(radians) * wfreq;
-    console.log(x,y);
-    var layout = {
-      shapes:[{
-          type: 'line',
-          x0: 0.5,
-          y0: 0.5,
-          x1: x,
-          y1: y,
-          line: {
-            color: 'black',
-            width: 3
-          }
-        }],
-      title: 'Washing frequency',
-      xaxis: {visible: false, range: [-1, 1]},
-      yaxis: {visible: false, range: [-1, 1]}
-    };
- 
-  var data = [traceA];
- 
-  Plotly.newPlot('gauge', data, layout);
+      var degrees = washFreq *20, radius = .25;
+      var radians = degrees * Math.PI / 180;
+      var x = 1 * radius * Math.cos(radians);
+      var y = radius * Math.sin(radians);
+      
+      pointx = 0.5-x;
+      pointy = 0.5+y;
+      console.log(pointx,pointy);
+      var layout = {
+        shapes:[{
+            type: 'line',
+            x0: 0.5,
+            y0: 0.5,
+            x1: pointx,
+            y1: pointy,
+            line: {
+              color: 'black',
+              width: 3
+            }
+          }],
+        title: 'Washing frequency',
+        xaxis: {visible: false, range: [-1, 1]},
+        yaxis: {visible: false, range: [-1, 1]}
+      };
+  
+    var data = [traceA];
+  
+    Plotly.newPlot('gauge', data, layout);
+});
 }
 
 //Cattch the event when the subject is changed and update the metadata and the graphs.
@@ -175,8 +184,7 @@ function optionChanged(value) {
   //console.log(value);
   buildMetadata(value);
   buildChart(value);
-  
+  buildguage(value);
 }
 //Initialize the dashboard
 init();
-buildguage(10);
